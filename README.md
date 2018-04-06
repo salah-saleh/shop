@@ -1,24 +1,17 @@
 # SHOP
 
-## Prerequisites
+Shop App of Polymer + Redux + Firebase.
 
-### Polymer CLI
+This is a modified version by Salah Saleh (me [at] s-saleh [dot] com).
 
-Install [polymer-cli](https://github.com/Polymer/polymer-cli):
+## Setup
 
-    npm install -g polymer-cli
-
-### Setup
-
-    # Using CLI
-    mkdir shop
-    cd shop
-    polymer init shop
-
-    # Or cloning direct from GitHub
-    git clone https://github.com/Polymer/shop.git
+    # Cloning direct from GitHub
+    git clone https://github.com/salah-saleh/shop.git
     cd shop
     bower install
+    npm install
+
 
 ## Start the development server
 
