@@ -16,7 +16,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template>
 
     <style>
-
       :host {
         display: block;
         position: relative;
@@ -34,7 +33,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         transition: 0.5s opacity;
         @apply --shop-image-img;
       }
-
     </style>
 
     <img id="img" alt$="[[alt]]" on-load="_onImgLoad" on-error="_onImgError">
@@ -47,28 +45,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       static get is() { return 'shop-image'; }
 
-      static get properties() { return {
+      static get properties() {
+        return {
 
-        alt: String,
+          alt: String,
 
-        src: {
-          type: String,
-          observer: '_srcChanged'
-        },
+          src: {
+            type: String,
+            observer: '_srcChanged'
+          },
 
-        placeholderImg: {
-          type: String,
-          observer: '_placeholderImgChanged'
+          placeholderImg: {
+            type: String,
+            observer: '_placeholderImgChanged'
+          }
+
         }
-
-      }}
+      }
 
       _srcChanged(src) {
         this.$.img.removeAttribute('src');
         this.$.img.style.transition = '';
         this.$.img.style.opacity = 0;
         if (src) {
-          this.$.img.src = src;
+          this.$.img.src = "https://raw.githubusercontent.com/Polymer/shop/master/" + src;
         }
       }
 

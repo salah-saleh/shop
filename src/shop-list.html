@@ -11,7 +11,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
-<link rel="import" href="shop-category-data.html">
+<link rel="import" href="../redux/redux-mixin.html">
 <link rel="import" href="shop-common-styles.html">
 <link rel="import" href="shop-image.html">
 <link rel="import" href="shop-list-item.html">
@@ -21,7 +21,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template>
 
     <style include="shop-common-styles">
-
       .hero-image {
         position: relative;
         height: 320px;
@@ -37,13 +36,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           left: -9999px;
           right: -9999px;
           max-width: none;
-        };
+        }
+        ;
       }
 
       .grid {
-        @apply --layout-horizontal;
-        @apply --layout-wrap;
-        @apply --layout-justified;
+        @apply(--layout-horizontal);
+        @apply(--layout-wrap);
+        @apply(--layout-justified);
         margin: 0 10px 32px 10px;
         padding: 0;
         list-style: none;
@@ -58,7 +58,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .grid a {
-        display:block;
+        display: block;
         text-decoration: none;
       }
 
@@ -67,36 +67,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           display: none;
         }
 
-        .grid  li {
+        .grid li {
           -webkit-flex-basis: 50%;
           flex-basis: 50%;
           max-width: 50%;
         }
       }
-
     </style>
 
     <!--
       app-route provides the name of the category.
     -->
-    <app-route
-        route="[[route]]"
-        pattern="/:category"
-        data="{{routeData}}"></app-route>
+    <app-route route="[[route]]" pattern="/:category" data="{{routeData}}"></app-route>
 
-    <!--
-      shop-category-data provides the category data for a given category name.
-    -->
-    <shop-category-data
-        id="categoryData"
-        category-name="[[routeData.category]]"
-        category="{{category}}"
-        failure="{{failure}}"></shop-category-data>
-
-    <shop-image
-        alt="[[category.title]]"
-        src="[[category.image]]"
-        placeholder-img="[[category.placeholder]]" class="hero-image"></shop-image>
+    <shop-image alt="[[category.title]]" src="[[category.image]]" placeholder-img="[[category.placeholder]]" class="hero-image"></shop-image>
 
     <header>
       <h1>[[category.title]]</h1>
@@ -104,72 +88,53 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </header>
 
     <ul class="grid" hidden$="[[failure]]">
-      <dom-repeat items="[[_getListItems(category.items)]]" initial-count="4">
+      <dom-repeat items="[[category.items]]" initial-count="4">
         <template>
           <li>
-            <a href$="[[_getItemHref(item)]]"><shop-list-item item="[[item]]"></shop-list-item></a>
+            <a href$="[[_getItemHref(item)]]">
+              <shop-list-item item="[[item]]"></shop-list-item>
+            </a>
           </li>
         </template>
       </dom-repeat>
     </ul>
 
-    <!--
-      shop-network-warning shows a warning message when the items can't be rendered due
-      to network conditions.
-    -->
-    <shop-network-warning
-        hidden$="[[!failure]]"
-        offline="[[offline]]"
-        on-try-reconnect="_tryReconnect"></shop-network-warning>
-
   </template>
 
   <script>
 
-    class ShopList extends Polymer.Element {
+    class ShopList extends App.ReduxMixin(Polymer.Element) {
 
       static get is() { return 'shop-list'; }
 
-      static get properties() { return {
+      static get properties() {
+        return {
+          categories: {
+            type: Array,
+            statePath: App.select.categories,
+            observer: '_fetchCategoryItems'
+          },
 
-        category: Object,
+          category: {
+            type: Object,
+            statePath: App.select.category,
+          },
 
-        route: Object,
+          routeData: {
+            type: Object,
+            observer: '_fetchCategoryItems'
+          },
 
-        routeData: Object,
+          route: Object,
 
-        visible: {
-          type: Boolean,
-          value: false
-        },
-
-        offline: {
-          type: Boolean,
-          observer: '_offlineChanged'
-        },
-
-        failure: Boolean
-
-      }}
-
-      static get observers() { return [
-        '_categoryChanged(category, visible)'
-      ]}
-
-      connectedCallback() {
-        super.connectedCallback();
-        this.isAttached = true;
+          visible: {
+            type: Boolean,
+            value: false,
+            observer: '_categoryChanged'
+          },
+        }
       }
 
-      disconnectedCallback() {
-        super.disconnectedCallback();
-        this.isAttached = false;
-      }
-
-      _getListItems(items) {
-        // Return placeholder items when the items haven't loaded yet.
-        return items || [{},{},{},{},{},{},{},{},{},{}];
-      }
 
       _getItemHref(item) {
         // By returning null when `itemId` is undefined, the href attribute won't be set and
@@ -181,38 +146,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (!quantity) {
           return '';
         }
-        let pluralizedQ = quantity === 1 ? 'item' : 'items';
-        return  '(' + quantity + ' ' + pluralizedQ + ')';
+        var pluralizedQ = quantity === 1 ? 'item' : 'items';
+        return '(' + quantity + ' ' + pluralizedQ + ')';
       }
 
-      _categoryChanged(category, visible) {
-        if (!visible) {
+      _categoryChanged() {
+        if (!this.category)
           return;
-        }
-        this._changeSectionDebouncer = Polymer.Debouncer.debounce(this._changeSectionDebouncer,
-          Polymer.Async.microTask, () => {
-            if (category) {
-              // Notify the category and the page's title
-              this.dispatchEvent(new CustomEvent('change-section', {
-                bubbles: true, composed: true, detail: {
-                  category: category.name,
-                  title: category.title,
-                  image: this.baseURI + category.image
-                }}));
-            } else {
-              this.dispatchEvent(new CustomEvent('show-invalid-url-warning', {
-                bubbles: true, composed: true}));
+        if (this.visible) {
+          this.dispatchEvent(new CustomEvent('change-section', {
+            detail: {
+              category: this.category.name,
+              title: this.category.title
             }
-          });
+          }));
+        }
       }
 
-      _tryReconnect() {
-        this.$.categoryData.refresh();
-      }
-
-      _offlineChanged(offline) {
-        if (!offline && this.isAttached) {
-          this._tryReconnect();
+      _fetchCategoryItems() {
+        this.category = {};
+        let categories = this.categories;
+        const categoryName = this.routeData.category;
+        if (categories.length && categoryName) {
+          let categoryObj = categories.find(obj => { return obj.name === categoryName; });
+          this.dispatch(this.actions.computeCategory(categoryObj));
         }
       }
 

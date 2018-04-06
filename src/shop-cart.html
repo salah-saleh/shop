@@ -9,6 +9,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../redux/redux-mixin.html">
 <link rel="import" href="shop-button.html">
 <link rel="import" href="shop-common-styles.html">
 <link rel="import" href="shop-form-styles.html">
@@ -18,7 +19,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template>
 
     <style include="shop-common-styles shop-button shop-form-styles">
-
       .list {
         margin: 40px 0;
       }
@@ -40,12 +40,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
 
       }
-
     </style>
 
     <div class="main-frame">
       <div class="subsection" visible$="[[!_hasItems]]">
-        <p class="empty-cart">Your <iron-icon icon="shopping-cart"></iron-icon> is empty.</p>
+        <p class="empty-cart">Your
+          <iron-icon icon="shopping-cart"></iron-icon> is empty.</p>
       </div>
       <div class="subsection" visible$="[[_hasItems]]">
         <header>
@@ -60,7 +60,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </dom-repeat>
         </div>
         <div class="checkout-box">
-          Total: <span class="subtotal">[[_formatTotal(total)]]</span>
+          Total:
+          <span class="subtotal">[[_formatTotal(total)]]</span>
           <shop-button responsive>
             <a href="/checkout">Checkout</a>
           </shop-button>
@@ -72,27 +73,35 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <script>
 
-    class ShopCart extends Polymer.Element {
+    class ShopCart extends App.ReduxMixin(Polymer.Element) {
 
       static get is() { return 'shop-cart'; }
 
-      static get properties() { return {
+      static get properties() {
+        return {
 
-        total: Number,
+          total: {
+            type: Number,
+            statePath: App.select.cartTotalPrice,
+          },
 
-        cart: Array,
+          cart: {
+            type: Array,
+            statePath: App.select.cart,
+          },
 
-        visible: {
-          type: Boolean,
-          observer: '_visibleChanged'
-        },
+          visible: {
+            type: Boolean,
+            observer: '_visibleChanged'
+          },
 
-        _hasItems: {
-          type: Boolean,
-          computed: '_computeHasItem(cart.length)'
+          _hasItems: {
+            type: Boolean,
+            computed: '_computeHasItem(cart.length)'
+          }
+
         }
-
-      }}
+      }
 
       _formatTotal(total) {
         return isNaN(total) ? '' : '$' + total.toFixed(2);
@@ -110,7 +119,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (visible) {
           // Notify the section's title
           this.dispatchEvent(new CustomEvent('change-section', {
-            bubbles: true, composed: true, detail: { title: 'Your cart' }}));
+            bubbles: true, composed: true, detail: { title: 'Your cart' }          
+          }));
         }
       }
 

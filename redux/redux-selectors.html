@@ -1,0 +1,81 @@
+<script src="../node_modules/reselect/dist/reselect.js"></script>
+
+<script>
+  (() => {
+  	const getCategories = (state) => {
+  		return state.categoriesReducer.categories;
+	};
+		
+	const getCategory = (state) => {
+		return state.categoriesReducer.category;
+	};
+
+	const getCart = (state) => {
+		return state.cartReducer.cart;
+	};
+
+	const hasNetworkReqFailed = (state) => {
+		return state.categoriesReducer.failure;
+	};	
+
+  	const categories = Reselect.createSelector([getCategories],
+  		(categories) => {
+  			return categories;
+  		}
+	);
+		
+	const category = Reselect.createSelector([getCategory],
+		(category) => {
+			return category;
+		}
+	);
+
+	const networkFailure = Reselect.createSelector([hasNetworkReqFailed],
+		(failure) => {
+			return failure;
+		}
+	);	
+
+	// 
+
+
+	const cart = Reselect.createSelector([getCart],
+		(cart) => {
+			return cart;
+		}
+	);		  
+
+	const cartNumItems = Reselect.createSelector([getCart],
+		(cart) => {
+			if (cart) {
+				return cart.reduce((total, entry) => {
+					return total + entry.quantity;
+				}, 0);
+			}
+
+			return 0;
+		}
+	);	
+
+	const cartTotalPrice = Reselect.createSelector([getCart],
+		(cart) => {
+			if (cart) {
+				return cart.reduce((total, entry) => {
+					return total + entry.quantity * entry.item.price;
+				}, 0);
+			}
+
+			return 0;
+		}
+	);
+
+  	App.select = {
+			categories,
+			category,
+			networkFailure,
+			cart,
+			cartNumItems,
+			cartTotalPrice,
+  	};
+  })();
+</script>

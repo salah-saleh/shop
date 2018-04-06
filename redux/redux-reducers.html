@@ -1,0 +1,103 @@
+<script src="../node_modules/redux/dist/redux.min.js"></script>
+
+<script>
+	(() => {
+		const initialState = {
+			categories: [],
+			category: {},
+			cart: [],
+			failure: false,
+		};
+
+		const _normalizeObject = (obj) => {
+			Object.keys(obj).map(k => {
+				obj[k]["key"] = k;
+				return obj[k];
+			});
+			return obj;
+		};
+
+		const categoriesReducer = (state, action) => {
+			if (!state) return initialState;
+
+			const payload = action.payload;
+			switch (action.type) {
+				case 'FETCH_CATEGORIES':
+					const categories = _normalizeObject(payload);
+					return Object.assign({}, state, {categories: categories, failure: false});
+				case 'COMPUTE_CATEGORY':
+					let category = action.catObj;
+					category.items = _normalizeObject(payload);
+					return Object.assign({}, state, { category: category, failure: false});
+				case 'SET_CATEGORIES_ITEMS':
+					return Object.assign({}, state, { categories: payload });
+				case 'SET_CATEGORY_ITEMS':
+					return Object.assign({}, state, { category: payload });
+				case 'NETWORK_ERROR':
+					return Object.assign({}, state, { failure: true });			
+				default:
+					return state;
+			}
+		};
+
+		const _indexOfEntry = (cart, item, size) => {
+			if (cart && item) {
+				for (let i = 0; i < cart.length; ++i) {
+					let entry = cart[i];
+					if (entry.item.name === item.name && entry.size === size) {
+						return i;
+					}
+				}
+			} 
+			return -1;
+		};
+
+		const _editCartItem = (cart, index, detail) => {
+			if (detail.quantity === 0) {
+				// Remove item from cart when the new quantity is 0.
+				if (index !== -1) {
+					cart.splice(index, 1);
+				}
+			} else {
+				if (index !== -1) {
+					cart.splice(index, 1, detail);
+				} else {
+					cart.push(detail);
+				}
+			}
+		};
+
+		const cartReducer = (state, action) => {
+			const detail = action.detail;
+			if (!state) return initialState;
+			if (!detail) return state;
+
+			const i = _indexOfEntry(state.cart, detail.item, detail.size);
+			let cart = state.cart.slice(0);
+			switch (action.type) {
+				case 'SET_CART_ITEMS': 
+					return Object.assign({}, state, { cart: detail.cart });
+				case 'ADD_CART_ITEM':
+					if (i !== -1) {
+						detail.quantity += cart[i].quantity;
+					}
+					_editCartItem(cart, i, detail);
+					return Object.assign({}, state, { cart: cart });
+				case 'EDIT_CART_ITEM':
+					cart = _editCartItem(state.cart, i, detail);
+					return Object.assign({}, state, { cart: cart });
+				case 'CLEAR_CART_ITEMS': 
+					return Object.assign({}, state, { cart: [] });					
+				default:
+					return state;
+			}
+		};
+
+		window.App = window.App || {};
+
+		App.rootReducer = Redux.combineReducers({
+			categoriesReducer: categoriesReducer,
+			cartReducer: cartReducer,
+		});
+	})();
+</script>

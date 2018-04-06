@@ -1,0 +1,121 @@
+<script src="../node_modules/firebase/firebase.js"></script>
+<link rel="import" href="firebase-config.html">
+
+<script>
+	(() => {
+
+		// Initialize Firebase
+		firebase.initializeApp(App.firebaseConfig);
+		const Categories = firebase.database().ref('categories');
+
+		const fetchCategories = () => {
+			return dispatch => {
+				Categories.once('value', async (snapshot) => {
+					const val = await snapshot.val();
+					dispatch({
+						type: 'FETCH_CATEGORIES',
+						payload: val
+					});
+				}, (error) => {
+					dispatch({
+						type: 'NETWORK_ERROR',
+						payload: {}
+					});
+				}
+				);
+			};
+		};
+
+		const computeCategory = (categoryObject) => {
+			return dispatch => {
+				try {
+					const category = firebase.database().ref(categoryObject.name);
+					category.once('value', async (snapshot) => {
+						const val = await snapshot.val();
+						dispatch({
+							type: 'COMPUTE_CATEGORY',
+							payload: val,
+							catObj: categoryObject
+						});
+					}, (error) => {
+						dispatch({
+							type: 'NETWORK_ERROR',
+							payload: false
+						});
+					});
+				} catch (e) {
+					console.log(e);
+					dispatch({
+						type: 'NETWORK_ERROR',
+						payload: false
+					});
+				}
+			};
+
+		};
+
+		const setCategoriesFromLocalStorage = (categoriesObject) => {
+			return dispatch => {
+				dispatch({
+					type: 'SET_CATEGORIES_ITEMS',
+					payload: categoriesObject,
+				});
+			};
+		};
+
+		const setCategoryFromLocalStorage = (categoryObject) => {
+			return dispatch => {
+				dispatch({
+					type: 'SET_CATEGORY_ITEMS',
+					payload: categoryObject,
+				});
+			};
+		};
+
+		const setCartFromLocalStorage = (cart) => {
+			return dispatch => {
+				dispatch({
+					type: 'SET_CART_ITEMS',
+					detail: { cart: cart },
+				});
+			};
+		};
+
+		const addItemToCart = (detail) => {
+			return dispatch => {
+				dispatch({
+					type: 'ADD_CART_ITEM',
+					detail: detail,
+				});
+			};
+		};
+
+		const editItemInCart = (detail) => {
+			return dispatch => {
+				dispatch({
+					type: 'EDIT_CART_ITEM',
+					detail: detail,
+				});
+			};
+		};
+
+		const clearCart = () => {
+			return dispatch => {
+				dispatch({
+					type: 'CLEAR_CART_ITEMS',
+				});
+			};
+		};
+
+		App.actions = {
+			fetchCategories,
+			setCategoryFromLocalStorage,
+			setCategoriesFromLocalStorage,
+			computeCategory,
+			setCartFromLocalStorage,
+			addItemToCart,
+			editItemInCart,
+			clearCart,
+		};
+	})();
+</script>

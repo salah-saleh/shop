@@ -11,6 +11,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../redux/redux-mixin.html">
 <link rel="import" href="shop-icons.html">
 <link rel="import" href="shop-image.html">
 <link rel="import" href="shop-select.html">
@@ -20,7 +21,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template strip-whitespace>
 
     <style include="shop-select">
-
       :host {
         @apply --layout-horizontal;
         position: relative;
@@ -32,12 +32,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         height: 72px;
       }
 
-      shop-select > select {
+      shop-select>select {
         font-size: 16px;
         padding-left: 40px;
       }
 
-      shop-select > shop-md-decorator {
+      shop-select>shop-md-decorator {
         font-size: 12px;
         border: none;
       }
@@ -62,7 +62,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         text-overflow: ellipsis;
       }
 
-      .price, .size {
+      .price,
+      .size {
         display: inline-block;
         white-space: nowrap;
         color: var(--app-secondary-color);
@@ -73,7 +74,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         width: 144px;
       }
 
-      .size > span {
+      .size>span {
         margin-left: 10px;
       }
 
@@ -127,7 +128,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           margin: 10px 10px 0 0;
         }
 
-        .quantity, .size, .price {
+        .quantity,
+        .size,
+        .price {
           text-align: right;
           width: auto;
         }
@@ -154,16 +157,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           top: -6px;
         }
 
-        shop-select > select {
+        shop-select>select {
           padding: 2px 24px 2px 40px;
         }
 
-        .quantity, .size, .price {
+        .quantity,
+        .size,
+        .price {
           text-align: left;
           width: auto;
         }
       }
-
     </style>
 
     <a href$="/detail/[[entry.item.category]]/[[entry.item.name]]" title$="[[entry.item.title]]">
@@ -177,8 +181,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <div class="quantity">
           <shop-select>
             <label prefix>Qty:</label>
-            <select id="quantitySelect" aria-label="Change quantity" value="[[entry.quantity]]"
-                on-change="_quantityChange">
+            <select id="quantitySelect" aria-label="Change quantity" value="[[entry.quantity]]" on-change="_quantityChange">
               <option value="1">1</option>
               <option value="2">2</option>
               <option value="3">3</option>
@@ -195,41 +198,46 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <shop-md-decorator aria-hidden="true"></shop-md-decorator>
           </shop-select>
         </div>
-        <div class="size">Size: <span>[[entry.size]]</span></div>
+        <div class="size">Size:
+          <span>[[entry.size]]</span>
+        </div>
         <div class="price">[[_formatPrice(entry.item.price)]]</div>
 
         <!--
           Use on-click instead of on-tap to prevent the next cart item to be focused
         -->
-        <paper-icon-button class="delete-button" icon="close" aria-label$="Delete item [[entry.item.title]]"
-            on-click="_removeItem"></paper-icon-button>
+        <paper-icon-button class="delete-button" icon="close" aria-label$="Delete item [[entry.item.title]]" on-click="_removeItem"></paper-icon-button>
       </div>
     </div>
   </template>
 
   <script>
 
-    class ShopCartItem extends Polymer.Element {
+    class ShopCartItem extends App.ReduxMixin(Polymer.Element) {
 
       static get is() { return 'shop-cart-item'; }
 
-      static get properties() { return {
+      static get properties() {
+        return {
 
-        entry: Object
+          entry: Object
 
-      }}
+        }}
 
       _quantityChange() {
         this._setCartItem(parseInt(this.$.quantitySelect.value, 10));
       }
 
       _setCartItem(quantity) {
+        const detail = {
+          item: this.entry.item,
+          quantity: quantity,
+          size: this.entry.size
+        };
+        this.dispatch(this.actions.editItemInCart(detail));
         this.dispatchEvent(new CustomEvent('set-cart-item', {
-          bubbles: true, composed: true, detail: {
-            item: this.entry.item,
-            quantity: quantity,
-            size: this.entry.size
-          }}));
+          bubbles: true, composed: true, detail: detail
+        }));
       }
 
       _formatPrice(price) {

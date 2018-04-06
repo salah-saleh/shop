@@ -1,0 +1,44 @@
+{
+  "name": "Shop",
+  "version": "1.0.0",
+  "description": "Polymer Shop App, Redux, Firebase",
+  "main": "index.html",
+  "directories": {
+    "test": "test"
+  },
+  "devDependencies": {
+    "eslint": "^4.10.0",
+    "eslint-config-google": "^0.9.1",
+    "eslint-plugin-html": "^3.2.2",
+    "eslint-plugin-mocha": "^4.11.0",
+    "polymer-cli": "^1.6.0"
+  },
+  "scripts": {
+    "start": "polymer serve -o",
+    "postinstall": "polymer install",
+    "lint": "eslint --cache --ext .js,.html . && polymer lint *.html",
+    "test": "polymer test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/salah-saleh/shop"
+  },
+  "keywords": [
+    "polymer",
+    "firebase",
+    "redux",
+    "web-components"
+  ],
+  "author": "",
+  "license": "BSD",
+  "bugs": {
+    "url": "https://github.com/salah-saleh/shop/issues"
+  },
+  "homepage": "https://github.com/salah-saleh/shop#readme",
+  "dependencies": {
+    "firebase": "^4.12.0",
+    "redux": "^3.7.2",
+    "redux-thunk": "^2.2.0",
+    "reselect": "^3.0.1"
+  }
+}
