@@ -12,6 +12,10 @@ This is a modified version by Salah Saleh (me [at] s-saleh [dot] com).
     bower install
     npm install
 
+    # Create DB in Firebase 
+    put the config to redux/firebase-config
+    import the Json files from https://github.com/Polymer/shop/tree/master/data to your Firebase DB.
+
 
 ## Start the development server
 
@@ -67,4 +71,4 @@ Use `polymer serve` to serve a specific build preset of the app. For example:
 
 ## Deploying
 
-Our [production deployment of SHOP](https://shop.polymer-project.org/) is hosted on App Engine with Node.js. You can examine its configuration on the [app-engine-node branch](https://github.com/Polymer/shop/tree/app-engine-node) of this repository and [compare it with the master branch](https://github.com/Polymer/shop/pull/145).
+[production deployment of SHOP](https://shop.polymer-project.org/) is hosted on App Engine with Node.js. You can examine its configuration on the [app-engine-node branch](https://github.com/Polymer/shop/tree/app-engine-node) of this repository and [compare it with the master branch](https://github.com/Polymer/shop/pull/145).
